@@ -1,0 +1,2 @@
+#includes metadata
+normalMapped = true

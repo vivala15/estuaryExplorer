@@ -1,0 +1,6 @@
+# Straightforward entity constructor info
+# Vector3f position, float rotx, float roty, float rotz, float scale 
+# the modelTexture provided in method
+# this includes...
+# x y z rotx roty rotz scale
+15 20 -15 0 0 0 .2
