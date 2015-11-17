@@ -58,11 +58,11 @@ public class BulletDebugRenderer extends IDebugDraw{
 	}
 	
 	public void render(Camera camera){
-		positions.clear();
-		colors.clear();
+//		positions.clear();
+//		colors.clear();
 		shader.start();
 		shader.loadViewMatrix(camera);
-		physicsWorld.drawDebug(); //this is where thyeare added
+		System.out.println("Renderering debug pts: " + Integer.toString(positions.size()));
 		positionData = listToArray(positions);
 		colorData = listToArray(colors);
 		//System.out.println("Draw data --- position data length: " + String.valueOf(positionData.length));
@@ -81,13 +81,18 @@ public class BulletDebugRenderer extends IDebugDraw{
 		GL20.glEnableVertexAttribArray(0); //only position
 		GL20.glEnableVertexAttribArray(1); //color
 		
-//		Matrix4f transformationMatrix = Maths.createTransformationMatrix(
-//				new org.lwjgl.util.vector.Vector3f(positionData[0], positionData[1], positionData[2]) ,
-//				0,0,0,1f);
-//		//in this case may need just camera adjusted transform...
-//		shader.loadTransformationMatrix(transformationMatrix);
+		Matrix4f transformationMatrix = Maths.createTransformationMatrix(
+				new org.lwjgl.util.vector.Vector3f(positionData[0], positionData[1], positionData[2]) ,
+				0,0,0,1f);
+		//in this case may need just camera adjusted transform...
+		shader.loadTransformationMatrix(transformationMatrix);
 		//render
+		
+		
 		GL11.glDrawArrays(GL11.GL_LINES, 0, rawModel.getVertexCount());
+		
+		
+		
 		//GL11.glDrawArrays(GL11.GL_TRIANGLES, 0, rawModel.getVertexCount());
 		
 		//GL11.glDrawArrays(GL11.GL_LINES, rawModel.getVertexCount(), GL11.GL_UNSIGNED_INT);
@@ -96,6 +101,9 @@ public class BulletDebugRenderer extends IDebugDraw{
 		GL20.glDisableVertexAttribArray(1);
 		GL30.glBindVertexArray(0);
 		shader.stop();
+		
+		
+		//GL11.glDrawArrays(GL11.GL_POINT, first, count);
 		//}
 		
 	}

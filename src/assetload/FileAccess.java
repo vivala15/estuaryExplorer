@@ -1,4 +1,4 @@
-package controller;
+package assetload;
 
 import java.io.BufferedReader;
 import java.io.File;

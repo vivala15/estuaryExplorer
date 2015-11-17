@@ -29,6 +29,9 @@ import water.WaterFrameBuffers;
 import water.WaterRenderer;
 import water.WaterShader;
 import water.WaterTile;
+import waterdynamic.DynamicWaterRenderer;
+import waterdynamic.DynamicWaterShader;
+import waterdynamic.OceanModel;
 
 public class MasterRenderer{
 
@@ -68,6 +71,12 @@ public class MasterRenderer{
 	WaterShader waterShader = new WaterShader();
 	WaterRenderer waterRenderer;
 	
+	//Better Water
+	//WaterFrameBuffers dynamicWaterBuffers = new WaterFrameBuffers();
+	DynamicWaterShader dynamicWaterShader = new DynamicWaterShader();
+	DynamicWaterRenderer dynamicWaterRenderer;
+	OceanModel oceanModel;
+	
 	//NormalMapping Renderer
 	private NormalMappingRenderer normalMapRenderer;
 	
@@ -82,6 +91,8 @@ public class MasterRenderer{
 		skyboxRenderer = new SkyboxRenderer(loader, projectionMatrix);
 		debugRenderer  = new BulletDebugRenderer(pw, loader, projectionMatrix);
 		waterRenderer = new WaterRenderer(loader, waterShader, this.getProjectionMatrix(),buffers);
+		dynamicWaterRenderer = new DynamicWaterRenderer(
+				loader, dynamicWaterShader, this.getProjectionMatrix(),buffers);
 		normalMapRenderer = new NormalMappingRenderer(projectionMatrix);
 
 	}
@@ -120,7 +131,7 @@ public class MasterRenderer{
 	//public void renderScene(List<Entity> entities, List<Terrain> terrains, List<Light> lights,
 
 	public void renderScene(List<Entity> entities, List<Entity> normalEntities, List<Terrain> terrains, List<Light> lights,
-			List<WaterTile> waters, Camera camera, Vector4f clipPlane){
+			List<WaterTile> waters, OceanModel oceanModel, Camera camera, Vector4f clipPlane){
 		for (Terrain terrain : terrains){
 			processTerrain(terrain);
 		}
@@ -130,22 +141,26 @@ public class MasterRenderer{
 		for(Entity entity : normalEntities){
 			processNormalMapEntity(entity);
 		}
-		if(!waters.isEmpty()){
-			
-			for(WaterTile water: waters){
+		
+		this.oceanModel = oceanModel;
+		
+		
+//		if(!waters.isEmpty()){
+//			
+//			for(WaterTile water: waters){
 				GL11.glEnable(GL30.GL_CLIP_DISTANCE0);
 				buffers.bindReflectionFrameBuffer();
-				float distance = 2 * (camera.getPosition().y - water.getHeight());
+				float distance = 2 * (camera.getPosition().y - waters.get(0).getHeight());
 				camera.getPosition().y -= distance;
 				camera.invertPitch();
 				//not using roll, but if was would need camera.invertRoll() as well
 				//+1f removes remaining edge glitch due to distortion though will add occasional reflection that shoouldn't happen
-				render(lights, camera, new Vector4f(0,1,0, -water.getHeight()+1f));
+				render(lights, camera, new Vector4f(0,1,0, -waters.get(0).getHeight()+1f));
 				camera.getPosition().y += distance;
 				camera.invertPitch();
 				//render refraction texture
 				buffers.bindRefractionFrameBuffer();
-				render(lights, camera, new Vector4f(0,-1,0,water.getHeight())); //this clip plane less
+				render(lights, camera, new Vector4f(0,-1,0,waters.get(0).getHeight())); //this clip plane less
 				buffers.unbindCurrentFrameBuffer();
 
 				//render to screen
@@ -153,10 +168,15 @@ public class MasterRenderer{
 				//some drivers ignore this... if this happens hack is to set lower clip plane really far off
 				GL11.glDisable(GL30.GL_CLIP_DISTANCE0);
 				//render scene
-			}
-		}
+//			}
+//		}
+		//		this.debugRenderer.render(camera);
 		render(lights, camera, clipPlane);
+		//water's must be AFTER render so that they capture the scenes in buffers
 		waterRenderer.render(waters, camera, lights.get(0));
+		
+		
+		//dynamicWaterRenderer.render(oceanModel, camera,  lights.get(0));
 		terrains.clear();
 		entities.clear(); //remember or they build up and it grows.
 		normalMapEntities.clear();
@@ -212,6 +232,8 @@ public class MasterRenderer{
 		shader.stop();
 		//make sure other shader's not running
 		normalMapRenderer.render(normalMapEntities, clipPlane, lights, camera);
+		
+		
 		terrainShader.start();
 		terrainShader.loadClipPlane(clipPlane);
 		terrainShader.loadSkyColour(RED, GREEN, BLUE);
@@ -220,6 +242,7 @@ public class MasterRenderer{
 		terrainRenderer.render(terrains);
 		terrainShader.stop();
 		skyboxRenderer.render(camera, RED, GREEN, BLUE);
+		
 		//clearing them elsewhere due to multiple rener calls 
 		//terrains.clear();
 		//entities.clear(); //remember or they build up and it grows.
@@ -237,7 +260,9 @@ public class MasterRenderer{
 	public void processTerrain(Terrain terrain){
 		terrains.add(terrain);
 	}
-	
+	public BulletDebugRenderer getDebugRenderer(){
+		return this.debugRenderer;
+	}
 	
 	/**
 	 * Sort the entity into the texture batches

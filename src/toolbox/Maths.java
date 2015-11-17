@@ -1,13 +1,18 @@
 package toolbox;
 
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 
+import javax.vecmath.Quat4f;
 
 import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
 import org.lwjgl.util.vector.Vector4f;
 
+import com.bulletphysics.linearmath.Transform;
+
+import bulletphysics.Physical;
 import entities.Camera;
 
 public class Maths {
@@ -136,4 +141,32 @@ public class Maths {
 		vecLWJGL.z = vecJavax.z;
 	
 	}
+	
+	public static javax.vecmath.Vector2f getNewNormalizedVector(javax.vecmath.Vector2f vector){
+		javax.vecmath.Vector2f normalizedVector = new javax.vecmath.Vector2f(vector.x, vector.y);
+		normalizedVector.normalize();
+		return normalizedVector;
+	}
+	
+	public static Matrix4f getTransformOperator(Physical p, Transform t, javax.vecmath.Matrix4f matrix){
+		p.getBody().getMotionState().getWorldTransform(t);
+		t.getMatrix(matrix);
+		Quat4f rot = new Quat4f();
+		t.getRotation(rot);
+		float y = rot.getY();
+		float x = rot.getX();
+		float z = rot.getZ();
+		float w = rot.getW();
+		float pitch = (float) Math.atan2(2*x*w - 2*y*z, 1 - 2*x*x - 2*z*z);
+		float yaw  = (float) Math.atan2(2*y*w - 2*x*z, 1 - 2*y*y - 2*z*z);
+		float roll   =  (float) Math.asin(2*x*y + 2*z*w);
+		
+		Matrix4f offsetTrans = Maths.createTransformationMatrix(new Vector3f(0,0,0), pitch*57.2958f,
+				 roll*57.2958f, yaw*57.2958f, 1.0f);
+		
+		
+		
+		return offsetTrans;
+	}
+	
 }

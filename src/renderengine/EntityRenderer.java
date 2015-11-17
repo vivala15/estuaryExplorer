@@ -32,20 +32,6 @@ public class EntityRenderer {
 		
 	}
 	
-	
-
-//	public void renderCollisionShapes( List<Entity> entities){
-//		for(Entity entity: entities){
-//			if(entity instanceof Physical){
-//				Physical pEntity = (Physical) entity;
-//				if(pEntity.getCollisionShape().isPolyhedral()){
-//					pEntity.getCollisionShape().
-//					for()
-//				}
-//			}
-//		}
-//	}
-	
 	public void render(Map<TexturedModel, List<Entity>> entities){
 		for(TexturedModel model:entities.keySet()){
 			prepareTexturedModel(model);
@@ -92,32 +78,5 @@ public class EntityRenderer {
 		shader.loadOffSet(entity.getTextureXOffset(), entity.getTextureYOffset()); //each time might be diff
 	}
 	
-	//unoptimized for multiple objects with same texture
-//	public void render(Entity entity, StaticShader shader){
-//		TexturedModel model = entity.getModel();
-//		RawModel rawModel = model.getRawModel();
-//		GL30.glBindVertexArray(rawModel.getVaoID());
-//		//attrib list 0
-//		GL20.glEnableVertexAttribArray(0);
-//		GL20.glEnableVertexAttribArray(1);
-//		GL20.glEnableVertexAttribArray(2);
-//		//load up entities transformations to vertex shader
-//		Matrix4f transformationMatrix = Maths.createTransformationMatrix(entity.getPosition(),
-//				entity.getRotX(), entity.getRotY(), entity.getRotZ(), entity.getScale());
-//		shader.loadTransformationMatrix(transformationMatrix);
-//		ModelTexture texture = model.getTexture();
-//		shader.loadShineVariables(texture.getShineDamper(), texture.getReflectivity());
-//		GL13.glActiveTexture(GL13.GL_TEXTURE0);
-//		GL11.glBindTexture(GL11.GL_TEXTURE_2D, model.getTexture().getID());
-//		GL11.glDrawElements(GL11.GL_TRIANGLES, rawModel.getVertexCount(), GL11.GL_UNSIGNED_INT, 0);
-//		//old way without indices
-//		//GL11.glDrawArrays(GL11.GL_TRIANGLES, 0, model.getVertexCount());
-//		//done so diable it
-//		GL20.glDisableVertexAttribArray(0);
-//		GL20.glDisableVertexAttribArray(1);
-//		GL20.glDisableVertexAttribArray(2);
-//		//unbind
-//		GL30.glBindVertexArray(0);
-//	}
 	
 }

@@ -61,7 +61,7 @@ public class Loader {
 		int vbo_normals = storeDynamicDataInAttributeList(2,3, normals);
 		unbindVAO();
 		DynamicRawModel drm = new DynamicRawModel(vaoID, indices.length, indicesBuffer, vbo_pos,
-				vbo_texture, vbo_normals);
+				 vbo_normals, vbo_texture);
 		return drm;
 		
 	}

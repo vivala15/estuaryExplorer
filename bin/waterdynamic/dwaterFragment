@@ -1,32 +1,46 @@
 #version 330 core
 
+
+in vec3 light_vector;
+in vec3 halfway_vector;
 in vec4 clipSpace;
-in vec2 textureCoords;
+in vec2 pass_textureCoords;
 in vec3 toCameraVector;
 in vec3 fromLightVector;
+in vec3 normal_vector;
+
+
 
 out vec4 out_Color;
 
 uniform sampler2D reflectionTexture;
 uniform sampler2D refractionTexture;
-uniform sampler2D dudvMap;
-uniform sampler2D normalMap;
+//uniform sampler2D dudvMap;
+//uniform sampler2D normalMap;
 uniform vec3 lightColour;
 uniform sampler2D depthMap;
 
-uniform float moveFactor;
+//uniform float moveFactor;
 
 
 const float waveStrength = 0.04;
-const float shineDamper = 10.0;
-const float reflectivity = 0.3;
+const float shineDamper = 15.0;
+const float reflectivity = 3.0;
+const float fog_factor = .4;
 
 void main(void) {
 
 	//convert clipspace to normalized device space
 	vec2 ndc = (clipSpace.xy/clipSpace.w)/2.0 +0.5;
+
 	vec2 refractTexCoords = vec2(ndc.x, ndc.y);
-	vec2 reflectTexCoords = vec2(ndc.x, -ndc.y); //neg bc reflect
+	vec2 reflectTexCoords = vec2(ndc.x, -ndc.y );
+
+	//introduce ripples by distoring reflection and refract
+	vec4 reflectionColour = texture(reflectionTexture, reflectTexCoords);
+	vec4 refractionColour = texture(refractionTexture, refractTexCoords);
+
+
 
 	//near and far values, need to same as master renderer, should do this programmatically 
 	//do this!!!
@@ -38,64 +52,65 @@ void main(void) {
 	depth = gl_FragCoord.z;
 	float waterDistance = 2.0 * near * far / (far + near - (2.0 * depth - 1.0) * (far - near));
 	float waterDepth = floorDistance - waterDistance;
-	
-	//only care for red and green , distortion in x direction
-	vec2 distortedTexCoords = texture(dudvMap, vec2(textureCoords.x + moveFactor, textureCoords.y)).rg*0.1;
-	distortedTexCoords = textureCoords + vec2(distortedTexCoords.x, distortedTexCoords.y+moveFactor);
-	//multi clamp.... to remove edge issues caused by distortion
-	vec2 totalDistortion = (texture(dudvMap, distortedTexCoords).rg * 2.0 - 1.0) * waveStrength * clamp(waterDepth/20.0, 0.0, 1.0);
-	
-	//old dist not as good - well above will let us more easily sample normal
-	//vec2 distortion1 = waveStrength*(texture(dudvMap, vec2(textureCoords.x + moveFactor, textureCoords.y)).rg * 2.0 -1.0);
-	//vec2 distortion2 = waveStrength*(texture(dudvMap, vec2(-textureCoords.x + moveFactor, textureCoords.y + moveFactor)).rg * 2.0 -1.0);
-	//vec2 totalDistortion = distortion1 + distortion2;
-
-	//glitch near edges, distortion drives values near 0 out of bounds... to fix clamp
-	
-	
-	refractTexCoords += totalDistortion;
-	refractTexCoords = clamp(refractTexCoords, 0.001, 0.999);
-	
-	reflectTexCoords += totalDistortion;
-	reflectTexCoords.x = clamp (reflectTexCoords.x, 0.001, 0.999);
-	reflectTexCoords.y = clamp (reflectTexCoords.y, -0.999, -0.001);
-	
-	//introduce ripples by distoring reflection and refract
-	vec4 reflectionColour = texture(reflectionTexture, reflectTexCoords);
-	vec4 refractionColour = texture(refractionTexture,refractTexCoords);
-
-
-	//normal mapping
-	vec4 normalMapColour = texture(normalMap, distortedTexCoords);
-	//extract normal
-	//increase y by arbitrary to straighten during normalization
-	vec3 normal = vec3(normalMapColour.r * 2.0 - 1.0, normalMapColour.b * 3.0, normalMapColour.g * 2.0 - 1.0);
-	normal = normalize(normal);
 
 	//fresnel calculation
 	vec3 viewVector = normalize(toCameraVector);
-	float refractiveFactor = dot(viewVector, normal); // assume water pointing up vec3(0.0,1.0,0.0)
-	refractiveFactor = pow(refractiveFactor, 5.0); // higher power more reflective, refractive 0.5
+	float refractiveFactor = dot(viewVector, normal_vector); // assume water pointing up vec3(0.0,1.0,0.0)
+	refractiveFactor = pow(refractiveFactor, 1.0); // higher power more reflective, refractive 0.5
 	//may haveto add this after fresnel to avoid black artifacts
 	refractiveFactor = clamp(refractiveFactor, 0.0, 1.0);
-	
-	//murky water -- play for some reason very high reflective?
-	vec4 murkyWaterColour = vec4(0.1, .125, .3, .25);
-	refractionColour = mix(refractionColour, murkyWaterColour, clamp(waterDepth/.01, 0.0, 1.0));
-	//refractionColour = mix(refractionColour, murkyWaterColour, 10.0);
-	
-	//specular lighting on the now normalmap
-	vec3 reflectedLight = reflect(normalize(fromLightVector), normal);
-	float specular = max(dot(reflectedLight, viewVector), 0.0);
-	specular = pow(specular, shineDamper);
-	//use water depth to dampen spec highlights near edges
-	vec3 specularHighlights = lightColour * specular * reflectivity * clamp(waterDepth/5.0, 0.0, 1.0);
-	
-	
-	out_Color = mix(reflectionColour,refractionColour,refractiveFactor);
-	//add blue tint
-	out_Color = mix(out_Color, vec4(0.0, 0.3, 0.5,1.0), 0.2) + vec4(specularHighlights, 0.0);
-	//make shallower water more transparent...
-	out_Color.a = clamp(waterDepth/2.0, 0.0, 1.0);
 
+	//murky water
+	vec4 murkyWaterColour = vec4(.23, .42, .5, .5);
+	refractionColour = mix(refractionColour, murkyWaterColour, clamp(waterDepth/10., 0.0, 1.0));
+
+
+
+    vec3 normal1         = normalize(normal_vector);
+    vec3 light_vector1   = normalize(light_vector);
+    vec3 halfway_vector1 = normalize(halfway_vector);
+
+	//refractTexCoords += totalDistortion;
+	//refractTexCoords = clamp(refractTexCoords, 0.001, 0.999);
+	
+	//reflectTexCoords.x += 5*normal_vector.x;
+	//reflectTexCoords.y += 5*normal_vector.z;
+	//reflectTexCoords.x = clamp (reflectTexCoords.x, 0.001, 0.999);
+	//reflectTexCoords.y = clamp (reflectTexCoords.y, -0.999, -0.001);
+	
+	vec4 c = vec4(1,1,1,1);//texture(water, tex_coord);
+ 
+    vec4 emissive_color = vec4(.02, .1, .4,  .50);
+    vec4 ambient_color  = vec4(0.0, 0.65, 0.95, .8);
+    vec4 diffuse_color  = vec4(0.5, 0.65, 0.75, 1.0);
+    vec4 specular_color = vec4(1.0, 0.25, 0.0,  1.0);
+	
+	float emissive_contribution = 0.40;
+    float ambient_contribution  = 0.20;
+    float diffuse_contribution  = 0.50;
+    float specular_contribution = 1.80;
+ 	light_vector1.y = -light_vector1.y;
+    //normal1.y = -normal1.y;
+    float d = dot(normal1, light_vector1);
+    bool facing = d > 0.0;
+    
+    
+    //sweet reflect function, takes inbound, normal and returns outbound
+	vec3 reflectedLightDirection = reflect(light_vector, normal1);
+	float specularFactor = dot(normalize(reflectedLightDirection) , normalize(toCameraVector));
+	specularFactor = max(specularFactor, 0.0);
+    
+    
+	float dampedFactor = pow(specularFactor, shineDamper);
+		
+	vec4 ambient_diffuse_spec = emissive_color * emissive_contribution +
+				ambient_color  * ambient_contribution  * c +
+				diffuse_color  * diffuse_contribution  * c * max(d,0) +
+				vec4(lightColour,1.0) * reflectivity * dampedFactor;
+			
+	//out_Color = mix(out_Color, reflectionColour, .5);
+		
+	out_Color = mix(reflectionColour,refractionColour,refractiveFactor);
+	out_Color = mix(out_Color, ambient_diffuse_spec, .2);
+	//out_Color = refractionColour;
 }

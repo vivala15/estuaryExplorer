@@ -5,20 +5,20 @@ package waterdynamic;
  * @author sascha
  *
  */
-public class VertexOcean
+class VertexOcean
 {
 	/**
 	 * position of the vertex in the mesh
 	 */
-	public float _x, _y, _z;
+	public float _x, _y, _z;// vertex
 	
 	/**
 	 * normal value of the vertex
 	 */
-	public float _nx, _ny, _nz;
-	public float a, b, c;
-	public float _a, _b, _c;
+	public float _nx, _ny, _nz;// normal
+	public float a, b, c;// htilde0
+	public float _a, _b, _c;// htilde0mk conjugate
 	
-	//TODO: still have no idea what these are for 
-	public float _ox, _oy, _oz;
+	public float _ox, _oy, _oz;// original position
 }
+

@@ -87,25 +87,36 @@ public class AirboatPlayer extends Player{
 		camera.getPosition().y += cameraVel.y;
 		camera.getPosition().z += cameraVel.z;
 		
-		Vector3f desiredRot = new Vector3f((float) (pitch*57f + 30.0f), roll*57f, -yaw * 57f +180f);
+		Vector3f desiredRot = new Vector3f((float) (pitch*57f + 23.0f), roll*57f, -yaw * 57f +180f);
 		Vector3f rotPos = new Vector3f(camera.getPitch(), camera.getRoll(), camera.getYaw());
 		Vector3f.sub(desiredRot, rotPos, delta_angle);
 		delta_angle.scale(.02f); //force constant
 		angle_vel.scale(.1f); //inverse drag
 		//Vector3f.sub(delta_an1le, angle_vel, delta_angle);
 		Vector3f.add(angle_vel, delta_angle, angle_vel);
+		
+		
+		
 		//Pull camera rotation to match pt of player
 //		if(pitch*57 > 25){
 //			pitch =( pitch*57 -12)/57;
 //		}
-//		camera.setPitch(pitch*57 + 25);
+		camera.setPitch(pitch*57 + 25);
 //		camera.setRoll(roll*57);
-//		camera.setYaw(-yaw*57 +180);
+		camera.setRoll(0);
+		camera.setYaw(-yaw*57 +180);
 		
-		camera.setPitch((camera.getPitch() + angle_vel.x * 57));
-		camera.setRoll((camera.getRoll() + angle_vel.y * 57));
-		camera.setYaw((camera.getYaw() + angle_vel.z * 57.12f));
-		System.out.println(camera.getYaw());
+		camera.getPosition().x = desiredPos.x;
+		camera.getPosition().y = desiredPos.y;
+		camera.getPosition().z = desiredPos.z;
+//		camera.setPitch((camera.getPitch() + angle_vel.x * 57));
+//		camera.setRoll((camera.getRoll() + angle_vel.y * 57));
+//		camera.setYaw((camera.getYaw() + angle_vel.z * 57.12f));
+		
+		
+		
+		
+		//System.out.println(camera.getYaw());
 //		System.out.println("Yaw: " + Float.toString(camera.getYaw()));
 //		System.out.println("Roll: " + Float.toString(camera.getRoll()));
 //		System.out.println("Pitch: " + Float.toString(camera.getPitch()));

@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.lwjgl.util.vector.Vector3f;
 
-import controller.AssetLoader;
+import assetload.AssetLoader;
 import controller.MainController;
 import models.TexturedModel;
 

@@ -1,4 +1,4 @@
-package controller;
+package assetload;
 
 import static org.junit.Assert.*;
 

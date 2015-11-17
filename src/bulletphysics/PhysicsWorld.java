@@ -1,11 +1,14 @@
 package bulletphysics;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 
 import javax.vecmath.Matrix4f;
 import javax.vecmath.Quat4f;
 import javax.vecmath.Vector3f;
+
+import org.lwjgl.util.vector.Vector4f;
 
 import com.bulletphysics.collision.broadphase.BroadphaseInterface;
 import com.bulletphysics.collision.broadphase.DbvtBroadphase;
@@ -34,6 +37,7 @@ import com.bulletphysics.util.ObjectArrayList;
 import entities.PhysicalEntity;
 import terrains.Terrain;
 import toolbox.Maths;
+import waterdynamic.OceanModel;
 
 public class PhysicsWorld {
 
@@ -49,11 +53,28 @@ public class PhysicsWorld {
 	private int DEBUG_MODE;
 	private BvhTriangleMeshShape terrainMeshShape = new BvhTriangleMeshShape();
 	private Transform originGetter = new Transform();
-	private TriangleIndexVertexArray triangleIndexedVertexArray = new TriangleIndexVertexArray();
+	//private TriangleIndexVertexArray triangleIndexedVertexArray = new TriangleIndexVertexArray();
+	private ArrayList<WaterPhysical> waterPhysicalEntities = new ArrayList<WaterPhysical>();
+	private OceanModel waterModel;
+	private float GRAVITY = -35f;
+	private float WATER_DENSITY = 5;
 	public PhysicsWorld(){
 		
 	}
 
+	/**
+	 * Add object to water, this will apply bouncy physics to object based
+	 * on the dynamic water mesh...
+	 * @param entity
+	 */
+	public void addObjectToWaterPhysics(WaterPhysical entity){
+		waterPhysicalEntities.add(entity);
+	}
+	
+	public void addWaterModel(OceanModel oceanModel){
+		this.waterModel = oceanModel;
+	}
+	
 	public void addTerrainObject(Terrain terrain){
 		TriangleIndexVertexArray triangleIndexedVertexArray = new TriangleIndexVertexArray();
 		triangleIndexedVertexArray.addIndexedMesh(terrain.getIndexedMeshShape());
@@ -102,9 +123,9 @@ public class PhysicsWorld {
 		RigidBodyConstructionInfo rbInfo = new RigidBodyConstructionInfo(mass, myMotionState, collShape, localInertia);
 		RigidBody body = new RigidBody(rbInfo);
 		//body.activate(true);
-		body.setAngularFactor(.4f);
+		body.setAngularFactor(1f);
 		body.setFriction(.1f);
-		body.setRestitution(.8f);
+		body.setRestitution(1f);
 		entity.setBody(body);
 		
 		// add the body to the dynamics world
@@ -131,11 +152,86 @@ public class PhysicsWorld {
 
 		dynamicsWorld = new DiscreteDynamicsWorld(dispatcher, broadphase, solver, collisionConfiguration);
 
-		dynamicsWorld.setGravity(new Vector3f(0f, -35f, 0f));
+		dynamicsWorld.setGravity(new Vector3f(0f, GRAVITY, 0f));
 	}
 	
 	public void takeStep(float dt){
+		//Calculate and apply Buoyancey force 
+		
+		//for now general at height 0
+		//if(waterModel != null){
+		
+		
+		this.waterBuoyancyStep(dt);
+		
+		
+		//}
 		dynamicsWorld.stepSimulation(dt, 2);
+		
+	}
+	
+	private void waterBuoyancyStep(float dt){
+		
+		for(WaterPhysical entity: waterPhysicalEntities){
+			//applyBuoyancyToObject(entity);
+			applyPlaneBuoyancyToObject(entity);
+		}
+	}
+	
+	private Transform t = new Transform();
+	private javax.vecmath.Matrix4f matrix = new javax.vecmath.Matrix4f();
+	private void applyPlaneBuoyancyToObject(WaterPhysical entity) {
+		Vector3f[] densityPts = entity.getDensityPositions();
+//		 org.lwjgl.util.vector.Matrix4f offsetMatrix = 
+//				Maths.getTransformOperator(entity, t,  matrix);
+		for(Vector3f densityPt: densityPts){
+			//gotta rotate and transform densityPt into world coords....
+			
+			//Vector4f testPoint = new Vector4f(densityPt.x,densityPt.y,densityPt.z,1f);
+//			Vector4f worldPt = new Vector4f();
+			Vector3f worldPt = new Vector3f();
+			 //org.lwjgl.util.vector.Matrix4f.transform(offsetMatrix, testPoint, worldPt);
+			
+			//DEMANDS WATER IS AT HEIGHT 0
+//			float deltaZ = worldPt.z - 0;
+			entity.getBody().getCenterOfMassPosition(worldPt);
+			float deltaZ = densityPt.y + worldPt.y - 0;
+			//System.out.println(worldPt.y);
+			//System.out.println(deltaZ);
+			if(deltaZ < 0 ){
+				//System.out.println(deltaZ);
+				//System.out.println(deltaZ);
+				//impulse = force*dt
+				//args --> impulse, position
+				entity.getBody()
+				.applyForce(
+						new Vector3f(0,deltaZ * GRAVITY * WATER_DENSITY* entity.getVolumePerDensityPoint(),0) , densityPt);
+			}
+		}
+		
+	}
+
+	
+	/**
+	 * For waves - not using right now due to time limits, won't be able to finish
+	 * efficientyly, storefor later
+	 * @param entity
+	 */
+	private void applyBuoyancyToObject(WaterPhysical entity){
+		Vector3f[] densityPts = entity.getDensityPositions();
+		
+		for(Vector3f densityPt: densityPts){
+			//gotta rotate and transform densityPt into world coords....
+			Vector3f otherPt = waterModel.findClosestMeshPt(densityPt, null);
+			float deltaZ = densityPt.z - otherPt.z;
+			if(deltaZ < 0 ){
+				//impulse = force*dt
+				//args --> impulse, position
+				entity.getBody()
+				.applyForce(
+						new Vector3f(0,deltaZ * -GRAVITY * WATER_DENSITY* entity.getVolumePerDensityPoint(),0) , densityPt);
+			}
+		}
 	}
 	
 	public void basicPlaneGround(){
@@ -193,6 +289,28 @@ public class PhysicsWorld {
 		//because this is unimplemented in in jbullet, time to write my own!
 		//this.dynamicsWorld.debugDrawWorld();
 		
+		
+		//Buoncy points
+		for(WaterPhysical wp: waterPhysicalEntities){
+			//While it would be best to draw these at points that would require
+			//the creation of new VAO/VBO and shader --- so fuck that and draw them as lines
+			Vector3f pt1b = new Vector3f();
+			Vector3f pt2b = new Vector3f();
+			wp.getBody().getWorldTransform(originGetter);
+			for(Vector3f densityPoint: wp.getDensityPositions()){
+				pt1b.x = densityPoint.x;
+				pt1b.y = densityPoint.y;
+				pt1b.z = densityPoint.z;
+				pt2b.x = densityPoint.x+1f;
+				pt2b.y = densityPoint.y+1f;
+				pt2b.z = densityPoint.z+1f;
+				originGetter.transform(pt1b);
+				originGetter.transform(pt2b);
+				this.dynamicsWorld.getDebugDrawer().drawLine(pt1b, pt2b, new Vector3f(255f,0f,0f));
+
+			
+			}	
+		}
 		//get collision shapes and figure something out
 		for(CollisionObject co: collObjects){
 			CollisionShape cs = co.getCollisionShape();
@@ -201,7 +319,7 @@ public class PhysicsWorld {
 			Vector3f pt2 = new Vector3f();
 			boolean tMesh = true;
 			if(cs instanceof PolyhedralConvexShape){
-				
+			
 				PolyhedralConvexShape poly = (PolyhedralConvexShape)cs;
 				int edgeNum = poly.getNumEdges();
 				for(int i =0; i <edgeNum; i++){

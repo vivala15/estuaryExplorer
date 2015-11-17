@@ -17,7 +17,9 @@ public class DynamicRawModel extends RawModel{
 	 */
 	public DynamicRawModel(int vaoID, int vertexCount,  int ind_buffer ,int pos_vboID, int normal_vboID, int texture_vboID ) {
 		super(vaoID, vertexCount);
-		// TODO Auto-generated constructor stub
+		this.pos_vboID = pos_vboID;
+		this.normal_vboID = normal_vboID;
+		this.texture_vboID = texture_vboID;
 	}
 
 	

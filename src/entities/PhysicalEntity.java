@@ -12,14 +12,20 @@ import com.bulletphysics.linearmath.MotionState;
 import com.bulletphysics.linearmath.Transform;
 
 import bulletphysics.Physical;
+import bulletphysics.WaterPhysical;
 import models.TexturedModel;
 import toolbox.Maths;
 
-public abstract class PhysicalEntity extends Entity implements Physical{
+public abstract class PhysicalEntity extends Entity implements WaterPhysical{
 
 	private CollisionShape collisionShape;
 	private RigidBody body;
 	private MotionState motionState; //sent back from Physical World
+	
+	private float massPerDensityPoint;
+	private float volumePerDensityPoint;
+	private javax.vecmath.Vector3f[] densityPositions;
+	
 	
 	private float mass;
 	private Vector3f scale;
@@ -120,12 +126,6 @@ public abstract class PhysicalEntity extends Entity implements Physical{
 		 Matrix4f offsetTrans = Maths.createTransformationMatrix(new Vector3f(0,0,0), pitch*57.2958f,
 				 roll*57.2958f, yaw*57.2958f, 1.0f);
 		
-		//System.out.println(readout.origin);
-		//this tops moving too... what the fuck
-//		javax.vecmath.Vector4f bodyCenter = new javax.vecmath.Vector4f(0, 0 , 0,1.0f);
-//		bulletOutTransformMatrix.transform(bodyCenter);
-		//Vector4f lwjglBodyCenter = new Vector4f();
-		//Maths.vector4fjavaxTovector4flwjgl(bodyCenter,lwjglBodyCenter);
 		Maths.convertBulletToOpenGL(bulletOutTransformMatrix, transformMatrix);
 		
 		//bullet doens't inherently scale, so scale now
@@ -153,22 +153,45 @@ public abstract class PhysicalEntity extends Entity implements Physical{
 		//Matrix4f.mul(transformMatrix, transformShapeToRender, transformShapeToRender);
 		//System.out.println(offsetTrans);
 		Matrix4f.mul(offsetTrans, transformShapeToRender, offsetTrans);
-		System.out.println(offsetTrans);
+//		System.out.println(offsetTrans);
 		Vector4f testPoint = new Vector4f(0,0,0,1f);
 		Vector3f testP = new Vector3f();
 		Matrix4f.transform(offsetTrans, testPoint, testPoint);
-		System.out.println(testPoint);
+//		System.out.println(testPoint);
 		//Matrix4f.mul(offsetTrans, transformMatrix, transformMatrix);
 		Maths.vector4flwjglTovector3flwjgl(testPoint, testP);
 		Matrix4f.translate(testP, transformMatrix, transformMatrix);
-		System.out.println("Pitch: " + Float.toString(pitch));
-		System.out.println("Roll: " + Float.toString(roll));
-		System.out.println("yaw: " + Float.toString(yaw));
+//		System.out.println("Pitch: " + Float.toString(pitch));
+//		System.out.println("Roll: " + Float.toString(roll));
+//		System.out.println("yaw: " + Float.toString(yaw));
 	
 //		Matrix4f.mul(transformShapeToRender, transformMatrix, transformMatrix);
 		
 		//lwjglBodyCenter3.scale(-1.0f);
 		//transformMatrix.translate(lwjglBodyCenter3);
 		return transformMatrix;
+	}
+
+	public float getMassPerDensityPoint() {
+		return massPerDensityPoint;
+	}
+
+	public void setMassPerDensityPoint(float massPerDensityPoint) {
+		this.massPerDensityPoint = massPerDensityPoint;
+	}
+
+	public javax.vecmath.Vector3f[] getDensityPositions() {
+		return densityPositions;
+	}
+
+	public void setDensityPositions(javax.vecmath.Vector3f[] densityPositions) {
+		this.densityPositions = densityPositions;
+	}
+	
+	public float getVolumePerDensityPoint(){
+		return this.volumePerDensityPoint;
+	}
+	public void setVolumePerDensityPoint(float volumePerDensityPoint){
+		this.volumePerDensityPoint = volumePerDensityPoint;
 	}
 }

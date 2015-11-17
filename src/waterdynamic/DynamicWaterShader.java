@@ -25,6 +25,7 @@ public class DynamicWaterShader extends ShaderProgram {
 	private int location_depthMap;
 	private int location_time;
 	
+	
 	public DynamicWaterShader() {
 		super(VERTEX_FILE, FRAGMENT_FILE);
 	}
@@ -32,6 +33,8 @@ public class DynamicWaterShader extends ShaderProgram {
 	@Override
 	protected void bindAttributes() {
 		bindAttribute(0, "position");
+		bindAttribute(1, "textureCoords");
+		bindAttribute(2, "normal");
 	}
 
 	@Override
@@ -41,22 +44,23 @@ public class DynamicWaterShader extends ShaderProgram {
 		location_modelMatrix = getUniformLocation("modelMatrix");
 		location_reflectionTexture = getUniformLocation("reflectionTexture");
 		location_refractionTexture = getUniformLocation("refractionTexture");
-		location_dudvMap = getUniformLocation("dudvMap");
-		location_moveFactor = getUniformLocation("moveFactor");
+//		location_dudvMap = getUniformLocation("dudvMap");
+//		location_moveFactor = getUniformLocation("moveFactor");
 		location_cameraPosition = getUniformLocation("cameraPosition");
-		location_normalMap = getUniformLocation("normalMap");
+//		location_normalMap = getUniformLocation("normalMap");
 		location_lightColour = getUniformLocation("lightColour");
 		location_lightPosition = getUniformLocation("lightPosition");
 		location_depthMap = getUniformLocation("depthMap");
 		location_time = getUniformLocation("time");
+		
 	}
 
 	
 	public void connectTextureUnits(){
 		super.loadInt(location_reflectionTexture,  0);
 		super.loadInt(location_refractionTexture, 1);
-		super.loadInt(location_dudvMap, 2);
-		super.loadInt(location_normalMap, 3);
+//		super.loadInt(location_dudvMap, 2);
+//		super.loadInt(location_normalMap, 3);
 		super.loadInt(location_depthMap, 4);
 		
 	}

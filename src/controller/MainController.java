@@ -3,10 +3,12 @@ package controller;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.util.vector.Vector3f;
 import org.lwjgl.util.vector.Vector4f;
 
+import assetload.AssetLoader;
 import bulletphysics.PhysicsWorld;
 import entities.Camera;
 import entities.Entity;
@@ -21,6 +23,7 @@ import renderengine.MasterRenderer;
 import terrains.Terrain;
 import toolbox.MousePicker;
 import water.WaterTile;
+import waterdynamic.OceanModel;
 
 public class MainController {
 
@@ -37,6 +40,7 @@ public class MainController {
 	private List<Entity> normalMapEntities = new ArrayList<Entity>();
 
 
+	private boolean DEBUG_DRAW_ENABLED = true;
 	private MainController(){
 		physicsWorld.initPhysics();
 		renderer = new MasterRenderer(new Loader(), physicsWorld);
@@ -56,15 +60,21 @@ public class MainController {
 		return controller;
 	}
 	
-	
+	/**
+	 * Load in assets from file directory
+	 * @param level
+	 */
 	public void loadUp(int level){
-		//may want to do graphical load screen here...
+		//TODO: may want to do graphical load screen here...
 		
 		//load stuffs
 		assetLoader.loadLevel(level);
 		
 	}
 	
+	/**
+	 * Run game - main while loop
+	 */
 	public void run(){
 		System.out.println("Begin Run");
 		Light light = new Light(new Vector3f(0,3000,-200), new Vector3f(1.f,1.0f, 1.0f)); // position, color = white
@@ -80,12 +90,35 @@ public class MainController {
 		
 		AirBoat boat_entity = (AirBoat) entities.get(0);
 		Player player = new AirboatPlayer(camera, boat_entity);
+		this.physicsWorld.addObjectToWaterPhysics(boat_entity);
 		//Player player = new GodPlayer(camera);
 		
 		for(Terrain t: terrains){
 			this.physicsWorld.addTerrainObject(t);
 		}
+		
+		//OceanModel ocean = new OceanModel(loader,renderer.getDebugRenderer());
+		OceanModel ocean = null;
+		
+//		double current = System.currentTimeMillis();
+//		double elapsed = 0;
+//		double previous = System.currentTimeMillis();
+//		double lag = 0;
+//		double MS_PER_UPDATE = 3;
+
+		
 		while(!Display.isCloseRequested()){
+//			
+//			
+//			  current = System.currentTimeMillis();
+//			  elapsed = current - previous;
+//			  previous = current;
+//			  lag += elapsed;
+//
+//			  if (lag >= MS_PER_UPDATE)
+//			  {
+			   
+			
 			//Read input
 			camera.move();
 //			lights.get(0).setPosition(camera.getPosition());
@@ -93,17 +126,33 @@ public class MainController {
 			player.shiftCamera();
 			//Take physics step(s)
 			this.physicsWorld.takeStep(DisplayManager.getFrameTimeSeconds());
-			//Render
-			renderer.renderScene(entities, normalMapEntities, terrains, lights, waters, camera, new Vector4f(0,0,0,1));
+			//long a = DisplayManager.getCurrentTime();
 			
 			
-			renderer.renderDebugger(camera);
+			//ocean.tick(DisplayManager.getFrameTimeSeconds());	
+			//System.out.println(DisplayManager.getCurrentTime()-a);
+			//Render - buffer cleared in this call so all drawing must be in this or after
+			renderer.renderScene(entities, normalMapEntities, terrains, lights, waters, ocean, camera, new Vector4f(0,0,0,1));
+			if(DEBUG_DRAW_ENABLED){
+				physicsWorld.drawDebug(); //this is where thyeare added
+				renderer.renderDebugger(camera);
+			}
+			
+
 			DisplayManager.updateDisplay();
+//		    lag -= MS_PER_UPDATE;
+//		  }
+//			if(Keyboard.isKeyDown(Keyboard.KEY_J)){
+//				DisplayManager.closeDisplay();
+//			}
 		}
 		cleanUp();
 		
 	}
 	
+	/**
+	 * Close window
+	 */
 	private void cleanUp(){
 		
 		
