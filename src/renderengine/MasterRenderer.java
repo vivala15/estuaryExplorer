@@ -19,6 +19,7 @@ import bulletphysics.PhysicsWorld;
 import entities.Camera;
 import entities.Entity;
 import entities.Light;
+import game.AirBoat;
 import models.TexturedModel;
 import normalMappingRenderer.NormalMappingRenderer;
 import shaders.StaticShader;
@@ -136,6 +137,9 @@ public class MasterRenderer{
 			processTerrain(terrain);
 		}
 		for (Entity entity : entities){
+//			if(entity instanceof AirBoat){
+//				System.out.println("Its being processed");
+//			}
 			processEntity(entity);
 		}
 		for(Entity entity : normalEntities){
@@ -177,8 +181,8 @@ public class MasterRenderer{
 		
 		
 		//dynamicWaterRenderer.render(oceanModel, camera,  lights.get(0));
-		terrains.clear();
-		entities.clear(); //remember or they build up and it grows.
+		this.terrains.clear();
+		this.entities.clear(); //remember or they build up and it grows.
 		normalMapEntities.clear();
 	}
 	/**

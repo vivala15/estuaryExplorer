@@ -15,73 +15,48 @@ import com.bulletphysics.dynamics.RigidBody;
 import com.bulletphysics.linearmath.DefaultMotionState;
 
 import controller.MainController;
+import entities.BoatPhysicalEntity;
 import entities.Entity;
 import entities.PhysicalEntity;
 import models.TexturedModel;
+import terrains.Terrain;
 import textures.ModelTexture;
 
-public class AirBoat extends PhysicalEntity{
+public class AirBoat extends BoatPhysicalEntity{
 
 	
-	private static float mass = 1000.0f;
-	private static float totalVolume = 120f;
-	private static CollisionShape collisionShape = new BoxShape(new javax.vecmath.Vector3f(6f, 1f,10f));
-	private javax.vecmath.Vector3f[] densityPositions;
+	private static float mass = 100.0f;
+	private float maxSpeed;
 	
 	public AirBoat(TexturedModel model, org.lwjgl.util.vector.Vector3f position, float rotX, float rotY, float rotZ, float scale) {
-		super(model, position, rotX, rotY, rotZ, scale, mass, collisionShape);
+		super(model, position, rotX, rotY, rotZ, scale, mass);
 		
 		Matrix4f transformShape = new Matrix4f();
 		transformShape.setIdentity();
-		transformShape.translate(new Vector3f(-10.0f, -4f, 5f));
-		
-		float hwidth = 5f;
-		float hlength = 5f;
-		float hheight = 2f;
-		
-		float baseHeight  = 2f;
-		densityPositions = new javax.vecmath.Vector3f[11];
-		densityPositions[0] = new javax.vecmath.Vector3f(hwidth,-hheight +baseHeight,hlength);
-		densityPositions[1] = new javax.vecmath.Vector3f(hwidth, -hheight+baseHeight, -hlength);
-		densityPositions[2] = new javax.vecmath.Vector3f(-hwidth,-hheight+baseHeight, hlength);
-		densityPositions[3] = new javax.vecmath.Vector3f(-hwidth,-hheight+baseHeight, -hlength);
-		densityPositions[4] = new javax.vecmath.Vector3f(0,-hheight+baseHeight, 0);
-		densityPositions[5] = new javax.vecmath.Vector3f(hwidth,hheight+baseHeight,hlength);
-		densityPositions[6] = new javax.vecmath.Vector3f(hwidth,hheight+baseHeight,-hlength);
-		densityPositions[7] = new javax.vecmath.Vector3f(-hwidth,hheight+baseHeight,hlength);
-		densityPositions[8] = new javax.vecmath.Vector3f(-hwidth,hheight+baseHeight,-hlength);
-		densityPositions[9] = new javax.vecmath.Vector3f(0,hheight+baseHeight, 0);
-		//one near front so it buoyancies more
-		densityPositions[10] = new javax.vecmath.Vector3f(0,hheight, hlength);
-		
-
-//		densityPositions[0] = new javax.vecmath.Vector3f(hwidth,-hheight,hlength);
-//		densityPositions[1] = new javax.vecmath.Vector3f(hwidth,-hlength,-hheight);
-//		densityPositions[2] = new javax.vecmath.Vector3f(-hwidth,hlength,-hheight);
-//		densityPositions[3] = new javax.vecmath.Vector3f(-hwidth,-hlength,-hheight);
-//		densityPositions[4] = new javax.vecmath.Vector3f(0,0, -hheight);
-//		densityPositions[5] = new javax.vecmath.Vector3f(hwidth,hlength,hheight);
-//		densityPositions[6] = new javax.vecmath.Vector3f(hwidth,-hlength,hheight);
-//		densityPositions[7] = new javax.vecmath.Vector3f(-hwidth,hlength,hheight);
-//		densityPositions[8] = new javax.vecmath.Vector3f(-hwidth,-hlength,hheight);
-//		densityPositions[9] = new javax.vecmath.Vector3f(0,0, hheight);
-		
+		transformShape.translate(new Vector3f(-10.0f, 2f, 5f));
+		//resolve discrepencies between model and physical position
 		super.setTransformShapeToRender(transformShape);
-		super.setDensityPositions(densityPositions);
-		super.setVolumePerDensityPoint(totalVolume/densityPositions.length);
-		super.setMassPerDensityPoint(mass/ densityPositions.length);
-		
+		super.setDragCoefficient(50.0f);
+		//Thrust over drag coefficient
+		this.maxSpeed = 20000/100f/4f;
+	
 	}
 
 	@Override
-	public float setMass() {
-		// TODO Auto-generated method stub
-		return 0;
+	public void setMass(float mass) {
+		this.mass = mass;
 	}
 
 	public float getMass(){
 		return this.mass;
 	}
+
+	@Override
+	public void generalSubClassBehavior() {
+		float length = this.getVelocity().length();
+		this.setRotX(-20f*Math.min(1.0f,length/this.maxSpeed));
+	}
+
 
 
 

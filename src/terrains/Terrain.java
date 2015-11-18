@@ -305,9 +305,8 @@ public class Terrain implements Physical{
 	}
 
 	@Override
-	public float setMass() {
+	public void setMass(float mass) {
 		// DO NOTHINg , mabye in future something cool , prob not
-		return 0;
 	}
 
 	public Matrix4f getTransformationMatrix() {
@@ -321,21 +320,6 @@ public class Terrain implements Physical{
 	public Vector3f getPosition() {
 		// TODO Auto-generated method stub
 		return this.position;
-	}
-
-
-	
-	//hmm need more interfaces as this isn't relevant
-	@Override
-	public void setBody(RigidBody body) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public RigidBody getBody() {
-		// TODO Auto-generated method stub
-		return null;
 	}
 	
 	public IndexedMesh getIndexedMeshShape(){

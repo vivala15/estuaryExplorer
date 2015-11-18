@@ -40,7 +40,7 @@ public class MainController {
 	private List<Entity> normalMapEntities = new ArrayList<Entity>();
 
 
-	private boolean DEBUG_DRAW_ENABLED = true;
+	private boolean DEBUG_DRAW_ENABLED = false;
 	private MainController(){
 		physicsWorld.initPhysics();
 		renderer = new MasterRenderer(new Loader(), physicsWorld);
@@ -84,13 +84,13 @@ public class MainController {
 		Camera camera = new Camera();
 		MousePicker picker = new MousePicker(camera, renderer.getProjectionMatrix());
 		//Player player = new AirboatPlayer(camera, boat_entity);
-		System.out.println(entities.size());
-		System.out.println(waters.size());
-		System.out.println(terrains.size());
+		System.out.println("Number of Entities:  " + entities.size());
+		System.out.println("Number of Normal Entities:  " + normalMapEntities.size());
+		System.out.println("Number of Water tiles:  " + waters.size());
+		System.out.println("Number of Terrains:  " +terrains.size());
 		
 		AirBoat boat_entity = (AirBoat) entities.get(0);
 		Player player = new AirboatPlayer(camera, boat_entity);
-		this.physicsWorld.addObjectToWaterPhysics(boat_entity);
 		//Player player = new GodPlayer(camera);
 		
 		for(Terrain t: terrains){
@@ -99,38 +99,17 @@ public class MainController {
 		
 		//OceanModel ocean = new OceanModel(loader,renderer.getDebugRenderer());
 		OceanModel ocean = null;
-		
-//		double current = System.currentTimeMillis();
-//		double elapsed = 0;
-//		double previous = System.currentTimeMillis();
-//		double lag = 0;
-//		double MS_PER_UPDATE = 3;
 
-		
-		while(!Display.isCloseRequested()){
-//			
-//			
-//			  current = System.currentTimeMillis();
-//			  elapsed = current - previous;
-//			  previous = current;
-//			  lag += elapsed;
-//
-//			  if (lag >= MS_PER_UPDATE)
-//			  {
-			   
-			
+
+
+		while(!Display.isCloseRequested()){	
 			//Read input
 			camera.move();
-//			lights.get(0).setPosition(camera.getPosition());
 			player.checkInputs();
 			player.shiftCamera();
 			//Take physics step(s)
 			this.physicsWorld.takeStep(DisplayManager.getFrameTimeSeconds());
-			//long a = DisplayManager.getCurrentTime();
-			
-			
 			//ocean.tick(DisplayManager.getFrameTimeSeconds());	
-			//System.out.println(DisplayManager.getCurrentTime()-a);
 			//Render - buffer cleared in this call so all drawing must be in this or after
 			renderer.renderScene(entities, normalMapEntities, terrains, lights, waters, ocean, camera, new Vector4f(0,0,0,1));
 			if(DEBUG_DRAW_ENABLED){
@@ -138,13 +117,10 @@ public class MainController {
 				renderer.renderDebugger(camera);
 			}
 			
-
+			//picker.update();
+			//System.out.println(picker.getCurrentRay());
+			
 			DisplayManager.updateDisplay();
-//		    lag -= MS_PER_UPDATE;
-//		  }
-//			if(Keyboard.isKeyDown(Keyboard.KEY_J)){
-//				DisplayManager.closeDisplay();
-//			}
 		}
 		cleanUp();
 		

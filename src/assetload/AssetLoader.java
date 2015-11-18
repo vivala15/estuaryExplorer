@@ -219,6 +219,7 @@ public class AssetLoader {
 			classAndLocation.add(new Pair<EntityMembers, String>( EntityMembers.VisualEntity, "fern"));
 			classAndLocation.add(new Pair<EntityMembers, String>( EntityMembers.VisualEntity, "grass"));
 			classAndLocation.add(new Pair<EntityMembers, String>( EntityMembers.VisualEntity, "boulder"));
+			classAndLocation.add(new Pair<EntityMembers, String>( EntityMembers.VisualEntity, "tree"));
 		
 	}
 

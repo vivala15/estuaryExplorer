@@ -61,142 +61,142 @@ public class MainGameLoop{
 			System.out.println("Should hvae run");
 			
 		}else{
-		
-		
-		
-		
-		DisplayManager.createDisplay();
-		Loader loader = new Loader();
-		
-		//*********************TERRAIN STUFF *************
-		
-		TerrainTexture backgroundTexture = new TerrainTexture(loader.loadTexture("grass",true));
-		TerrainTexture rTexture = new TerrainTexture(loader.loadTexture("mud",true));
-		TerrainTexture gTexture = new TerrainTexture(loader.loadTexture("flower",true));
-		TerrainTexture bTexture = new TerrainTexture(loader.loadTexture("path",true));
-		
-		TerrainTexturePack texturePack = new TerrainTexturePack(backgroundTexture, rTexture, gTexture, bTexture);
-		TerrainTexture blendMap = new TerrainTexture(loader.loadTexture("blend_map",true));
-		//**************************************************
-
-			
-//		ModelData data = OBJFileLoader.loadOBJ("airboat_stripped"); //still! cuts out at faces
-//		RawModel boatModel = loader.loadToVAO(data.getVertices(), data.getTextureCoords(), data.getNormals(), data.getIndices());
-		RawModel boatModel = OBJLoader.loadObjModel("air_boat_exported", loader);
-		RawModel model = OBJLoader.loadObjModel("dragon", loader);
-		RawModel fernModel = OBJLoader.loadObjModel("grassModel", loader);
-		RawModel feModel = OBJLoader.loadObjModel("fern", loader);
-		//RawModel model = loader.laodToVAO(vertices,textureCoords, indices);
-		
-		//atlas example
-		ModelTexture fernTextureAtlas = new ModelTexture(loader.loadTexture("fern_atlas",true));
-		fernTextureAtlas.setNumberOfRows(2); //2 by 2 - this doesn't seem togeneral to all
-		
-		TexturedModel boatTextureModel  = new TexturedModel(boatModel, new ModelTexture(loader.loadTextureTGA("obj_files/Airboat/Texture/Airboat001", true)));
-		TexturedModel staticModel = new TexturedModel(model, new ModelTexture(loader.loadTexture("flag_belgium_square-256",true))); 
-		TexturedModel grassTextModel = new TexturedModel(fernModel, new ModelTexture(loader.loadTexture("gass_trans",true)));
-		TexturedModel fernTexturedModel = new TexturedModel(feModel, fernTextureAtlas);
-		
-		ModelTexture texture = staticModel.getTexture();
-		ModelTexture fern_texture = grassTextModel.getTexture();
-		//fern_texture.setHasTransparency(true);
-		fern_texture.setUseFakeLighting(true);
-		texture.setShineDamper(10);
-		texture.setReflectivity(1);
-		VisualEntity entity = new VisualEntity(staticModel, new Vector3f(0,-5,-25), 0,0,0,1);
-		VisualEntity entity2 = new VisualEntity(staticModel, new Vector3f(10,-5,-25), 0,0,0,1);
-		AirBoat boat_entity = new AirBoat(boatTextureModel, new Vector3f(15f, 20f, -15f), 0, 0, 0 ,.2f);
-		//System.out.println(boatTextureModel.getRawModel().getVertexCount());
-		VisualEntity fern_entity = new VisualEntity(grassTextModel, new Vector3f(7,0,-15), 0,0,0,1);
-		VisualEntity fernAtlasedEntity = new VisualEntity(fernTexturedModel, 0, new Vector3f(20,0,-15),0,0,0,1);
-		
-		Light light = new Light(new Vector3f(0,300,-200), new Vector3f(1.0f,1.0f,1.0f)); // position, color = white
-		List<Light> lights = new ArrayList<Light>();
-		lights.add(light);
-		//lights.add(new Light(new Vector3f(20,10,-2), new Vector3f(4,0,0), new Vector3f(1, .01f, 0.002f)));
-		//lights.add(new Light(new Vector3f(-20,10,-20), new Vector3f(0,0,4),new Vector3f(1, .01f, 0.002f)));
-		
-		Terrain terrain = new Terrain(0,-1,loader,texturePack, blendMap, "height_map");
-		Terrain terrain2 = new Terrain(1,-1,loader, texturePack, blendMap, "height_map");
-		
-		Camera camera = new Camera();
-		
-		
-		
-		List<GuiTexture> guiTextures = new ArrayList<GuiTexture>();
-		GuiTexture guitm = new GuiTexture(loader.loadTexture("thin_matrix",true), new Vector2f(0.5f, 0.5f), new Vector2f(0.25f, 0.25f));
-		guiTextures.add(guitm);
-		
-		GuiRenderer guiRenderer = new GuiRenderer(loader);
-		
-		
-		List<Entity> entities = new ArrayList<Entity>();
-		entities.add(entity);
-		entities.add(entity2);
-		entities.add(fern_entity);
-		entities.add(fernAtlasedEntity);
-		entities.add(boat_entity);
-		List<Terrain> terrains = new ArrayList<Terrain>();
-		terrains.add(terrain);
-		//terrains.add(terrain2);
-		
-		
-		
-		
-//		GuiTexture refraction = new GuiTexture(buffers.getRefractionTexture(), new Vector2f(0.5f, 0.5f), new Vector2f(0.25f, 0.25f));
-//		GuiTexture reflection = new GuiTexture(buffers.getReflectionTexture(), new Vector2f(-0.5f, 0.5f), new Vector2f(0.25f, 0.25f));
-		//guiTextures.add(refraction);
-		//guiTextures.add(reflection);
-		
-		PhysicsWorld pw = new PhysicsWorld();
-		pw.initPhysics();
-		//pw.basicPlaneGround();
-		pw.addTerrainObject(terrain);
-		pw.addPhysicalEntityObject(boat_entity);
-		//pw.addPhysicalEntityObject(air_boat);
-		
-		
-		MasterRenderer renderer = new MasterRenderer(loader,pw);
-		MousePicker picker = new MousePicker(camera, renderer.getProjectionMatrix());
-		
-		
-		
-		WaterFrameBuffers buffers = new WaterFrameBuffers();
-		WaterShader waterShader = new WaterShader();
-		WaterRenderer waterRenderer = new WaterRenderer(loader, waterShader, renderer.getProjectionMatrix(),buffers);
-		List<WaterTile> waters = new ArrayList<WaterTile>();
-		WaterTile water = new WaterTile(75, -75, 0);
-		waters.add(water);
-		
-		
-		Player player = new AirboatPlayer(camera, boat_entity);
-		//Player player = new GodPlayer(camera);
-		//renderer.setDebugMode(DebugDrawModes.DRAW_WIREFRAME);
-		
-		while(!Display.isCloseRequested()){
-			camera.move();
-			player.checkInputs();
-			player.shiftCamera();
-			picker.update();
-			
-			//renderer.renderScene(entities, terrains, lights, waters, camera, new Vector4f(0,0,0,1));
-			//guiRenderer.render(guiTextures);
-			
-			//renderer.renderDebugger(camera);
-		
-			pw.takeStep(DisplayManager.getFrameTimeSeconds());
-			
-			DisplayManager.updateDisplay();
-			
-			
-		}
-		
-		buffers.cleanUp();
-		guiRenderer.cleanUp();
-//		shader.cleanUp();
-		renderer.cleanUp();
-		loader.cleanUp(); //clean up once done
-		DisplayManager.closeDisplay();
+//		
+//		
+//		
+//		
+//		DisplayManager.createDisplay();
+//		Loader loader = new Loader();
+//		
+//		//*********************TERRAIN STUFF *************
+//		
+//		TerrainTexture backgroundTexture = new TerrainTexture(loader.loadTexture("grass",true));
+//		TerrainTexture rTexture = new TerrainTexture(loader.loadTexture("mud",true));
+//		TerrainTexture gTexture = new TerrainTexture(loader.loadTexture("flower",true));
+//		TerrainTexture bTexture = new TerrainTexture(loader.loadTexture("path",true));
+//		
+//		TerrainTexturePack texturePack = new TerrainTexturePack(backgroundTexture, rTexture, gTexture, bTexture);
+//		TerrainTexture blendMap = new TerrainTexture(loader.loadTexture("blend_map",true));
+//		//**************************************************
+//
+//			
+////		ModelData data = OBJFileLoader.loadOBJ("airboat_stripped"); //still! cuts out at faces
+////		RawModel boatModel = loader.loadToVAO(data.getVertices(), data.getTextureCoords(), data.getNormals(), data.getIndices());
+//		RawModel boatModel = OBJLoader.loadObjModel("air_boat_exported", loader);
+//		RawModel model = OBJLoader.loadObjModel("dragon", loader);
+//		RawModel fernModel = OBJLoader.loadObjModel("grassModel", loader);
+//		RawModel feModel = OBJLoader.loadObjModel("fern", loader);
+//		//RawModel model = loader.laodToVAO(vertices,textureCoords, indices);
+//		
+//		//atlas example
+//		ModelTexture fernTextureAtlas = new ModelTexture(loader.loadTexture("fern_atlas",true));
+//		fernTextureAtlas.setNumberOfRows(2); //2 by 2 - this doesn't seem togeneral to all
+//		
+//		TexturedModel boatTextureModel  = new TexturedModel(boatModel, new ModelTexture(loader.loadTextureTGA("obj_files/Airboat/Texture/Airboat001", true)));
+//		TexturedModel staticModel = new TexturedModel(model, new ModelTexture(loader.loadTexture("flag_belgium_square-256",true))); 
+//		TexturedModel grassTextModel = new TexturedModel(fernModel, new ModelTexture(loader.loadTexture("gass_trans",true)));
+//		TexturedModel fernTexturedModel = new TexturedModel(feModel, fernTextureAtlas);
+//		
+//		ModelTexture texture = staticModel.getTexture();
+//		ModelTexture fern_texture = grassTextModel.getTexture();
+//		//fern_texture.setHasTransparency(true);
+//		fern_texture.setUseFakeLighting(true);
+//		texture.setShineDamper(10);
+//		texture.setReflectivity(1);
+//		VisualEntity entity = new VisualEntity(staticModel, new Vector3f(0,-5,-25), 0,0,0,1);
+//		VisualEntity entity2 = new VisualEntity(staticModel, new Vector3f(10,-5,-25), 0,0,0,1);
+//		AirBoat boat_entity = new AirBoat(boatTextureModel, new Vector3f(15f, 20f, -15f), 0, 0, 0 ,.2f);
+//		//System.out.println(boatTextureModel.getRawModel().getVertexCount());
+//		VisualEntity fern_entity = new VisualEntity(grassTextModel, new Vector3f(7,0,-15), 0,0,0,1);
+//		VisualEntity fernAtlasedEntity = new VisualEntity(fernTexturedModel, 0, new Vector3f(20,0,-15),0,0,0,1);
+//		
+//		Light light = new Light(new Vector3f(0,300,-200), new Vector3f(1.0f,1.0f,1.0f)); // position, color = white
+//		List<Light> lights = new ArrayList<Light>();
+//		lights.add(light);
+//		//lights.add(new Light(new Vector3f(20,10,-2), new Vector3f(4,0,0), new Vector3f(1, .01f, 0.002f)));
+//		//lights.add(new Light(new Vector3f(-20,10,-20), new Vector3f(0,0,4),new Vector3f(1, .01f, 0.002f)));
+//		
+//		Terrain terrain = new Terrain(0,-1,loader,texturePack, blendMap, "height_map");
+//		Terrain terrain2 = new Terrain(1,-1,loader, texturePack, blendMap, "height_map");
+//		
+//		Camera camera = new Camera();
+//		
+//		
+//		
+//		List<GuiTexture> guiTextures = new ArrayList<GuiTexture>();
+//		GuiTexture guitm = new GuiTexture(loader.loadTexture("thin_matrix",true), new Vector2f(0.5f, 0.5f), new Vector2f(0.25f, 0.25f));
+//		guiTextures.add(guitm);
+//		
+//		GuiRenderer guiRenderer = new GuiRenderer(loader);
+//		
+//		
+//		List<Entity> entities = new ArrayList<Entity>();
+//		entities.add(entity);
+//		entities.add(entity2);
+//		entities.add(fern_entity);
+//		entities.add(fernAtlasedEntity);
+//		entities.add(boat_entity);
+//		List<Terrain> terrains = new ArrayList<Terrain>();
+//		terrains.add(terrain);
+//		//terrains.add(terrain2);
+//		
+//		
+//		
+//		
+////		GuiTexture refraction = new GuiTexture(buffers.getRefractionTexture(), new Vector2f(0.5f, 0.5f), new Vector2f(0.25f, 0.25f));
+////		GuiTexture reflection = new GuiTexture(buffers.getReflectionTexture(), new Vector2f(-0.5f, 0.5f), new Vector2f(0.25f, 0.25f));
+//		//guiTextures.add(refraction);
+//		//guiTextures.add(reflection);
+//		
+//		PhysicsWorld pw = new PhysicsWorld();
+//		pw.initPhysics();
+//		//pw.basicPlaneGround();
+//		pw.addTerrainObject(terrain);
+//		pw.addPhysicalEntityObject(boat_entity);
+//		//pw.addPhysicalEntityObject(air_boat);
+//		
+//		
+//		MasterRenderer renderer = new MasterRenderer(loader,pw);
+//		MousePicker picker = new MousePicker(camera, renderer.getProjectionMatrix());
+//		
+//		
+//		
+//		WaterFrameBuffers buffers = new WaterFrameBuffers();
+//		WaterShader waterShader = new WaterShader();
+//		WaterRenderer waterRenderer = new WaterRenderer(loader, waterShader, renderer.getProjectionMatrix(),buffers);
+//		List<WaterTile> waters = new ArrayList<WaterTile>();
+//		WaterTile water = new WaterTile(75, -75, 0);
+//		waters.add(water);
+//		
+//		
+//		Player player = new AirboatPlayer(camera, boat_entity);
+//		//Player player = new GodPlayer(camera);
+//		//renderer.setDebugMode(DebugDrawModes.DRAW_WIREFRAME);
+//		
+//		while(!Display.isCloseRequested()){
+//			camera.move();
+//			player.checkInputs();
+//			player.shiftCamera();
+//			picker.update();
+//			
+//			//renderer.renderScene(entities, terrains, lights, waters, camera, new Vector4f(0,0,0,1));
+//			//guiRenderer.render(guiTextures);
+//			
+//			//renderer.renderDebugger(camera);
+//		
+//			pw.takeStep(DisplayManager.getFrameTimeSeconds());
+//			
+//			DisplayManager.updateDisplay();
+//			
+//			
+//		}
+//		
+//		buffers.cleanUp();
+//		guiRenderer.cleanUp();
+////		shader.cleanUp();
+//		renderer.cleanUp();
+//		loader.cleanUp(); //clean up once done
+//		DisplayManager.closeDisplay();
 		}
 	}
 

@@ -4,3 +4,4 @@
 # this includes...
 # x y z rotx roty rotz scale
 15 20 -15 0 0 0 .2
+15 10 -15 0 0 0 .2

@@ -3,4 +3,4 @@
 # the modelTexture provided in method
 # this includes...
 # x y z rotx roty rotz scale
-15 20 25 0 0 0 .15
+300 20 80 0 0 0 .05

@@ -148,8 +148,15 @@ public class Maths {
 		return normalizedVector;
 	}
 	
+	/**
+	 * @deprecated
+	 * @param p
+	 * @param t
+	 * @param matrix
+	 * @return
+	 */
 	public static Matrix4f getTransformOperator(Physical p, Transform t, javax.vecmath.Matrix4f matrix){
-		p.getBody().getMotionState().getWorldTransform(t);
+		//p.getBody().getMotionState().getWorldTransform(t);
 		t.getMatrix(matrix);
 		Quat4f rot = new Quat4f();
 		t.getRotation(rot);
@@ -168,5 +175,6 @@ public class Maths {
 		
 		return offsetTrans;
 	}
+	
 	
 }
