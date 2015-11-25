@@ -16,6 +16,7 @@ import entities.Light;
 import entities.Player;
 import game.AirBoat;
 import game.AirboatPlayer;
+import game.EditorPlayer;
 import game.GodPlayer;
 import renderengine.DisplayManager;
 import renderengine.Loader;
@@ -82,7 +83,7 @@ public class MainController {
 		lights.add(light);
 		
 		Camera camera = new Camera();
-		MousePicker picker = new MousePicker(camera, renderer.getProjectionMatrix());
+		MousePicker picker = new MousePicker(camera, renderer.getProjectionMatrix(), controller.getTerrains());
 		//Player player = new AirboatPlayer(camera, boat_entity);
 		System.out.println("Number of Entities:  " + entities.size());
 		System.out.println("Number of Normal Entities:  " + normalMapEntities.size());
@@ -92,6 +93,7 @@ public class MainController {
 		AirBoat boat_entity = (AirBoat) entities.get(0);
 		Player player = new AirboatPlayer(camera, boat_entity);
 		//Player player = new GodPlayer(camera);
+		//Player playerEditor = new EditorPlayer(camera, picker, terrains, waters, assetLoader);
 		
 		for(Terrain t: terrains){
 			this.physicsWorld.addTerrainObject(t);
@@ -108,6 +110,10 @@ public class MainController {
 			player.checkInputs();
 			player.shiftCamera();
 			//Take physics step(s)
+			picker.update();
+//			playerEditor.checkInputs();
+//			playerEditor.shiftCamera();
+			//Vector3f terrainPoint = picker.getCurrentTerrainPoint();
 			this.physicsWorld.takeStep(DisplayManager.getFrameTimeSeconds());
 			//ocean.tick(DisplayManager.getFrameTimeSeconds());	
 			//Render - buffer cleared in this call so all drawing must be in this or after

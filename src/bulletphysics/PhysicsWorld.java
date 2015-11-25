@@ -48,7 +48,7 @@ public class PhysicsWorld {
  	private OceanModel waterModel;
 	BulletDebugRenderer debuggerDraw;
 	public PhysicsWorld(){
-		
+	
 	}
 
 	/**
@@ -71,8 +71,10 @@ public class PhysicsWorld {
 	 */
 	public void addPhysicalEntityObject(PhysicalEntity entity){
 		physicalEntities.add(entity);
-		
-		
+	}
+	
+	public boolean removePhysicalEntityObject(PhysicalEntity entity){
+		return physicalEntities.remove(entity);
 	}
 	
 	public void takeStep(float dt){

@@ -7,6 +7,7 @@ import org.lwjgl.util.vector.Vector3f;
 import org.lwjgl.util.vector.Vector4f;
 
 import bulletphysics.Physical;
+import controller.MainController;
 import models.TexturedModel;
 import terrains.Terrain;
 import toolbox.Maths;
@@ -28,7 +29,7 @@ public abstract class PhysicalEntity extends Entity implements Physical {
 	//not sure if this is correct, but equate 
 	//pitch, roll, yaw, with rx, ry, rz respectively
 	
-	private static float GRAVITY = -9.8f * 1f;
+	public static float GRAVITY = -9.8f * 2f;
 
 	private Matrix4f currentTransformMatrix;
 
@@ -138,6 +139,25 @@ public abstract class PhysicalEntity extends Entity implements Physical {
 
 	private Vector4f dummyRenderPosition = new Vector4f();
 
+	/**
+	 * Used by level editor as the regular position gets dumped and updated by phsyical position in this
+	 * model
+	 */
+//	Vector4f newPosition4 = new Vector4f(0f, 0f, 0f,1f);
+	public void setPosition(Vector3f newPosition){
+		//for this to work requires using inverse, !!!
+//		newPosition4.set(newPosition.x, newPosition.y, newPosition.z, 1.0f);
+//		Matrix4f.transform(getTransformShapeToRender(), newPosition4, dummyRenderPosition);
+//		this.getPhysicalPosition().x = dummyRenderPosition.x;
+//		this.getPhysicalPosition().y = dummyRenderPosition.y;
+//		this.getPhysicalPosition().z = dummyRenderPosition.z;
+	
+		this.getPhysicalPosition().x = newPosition.x;
+		this.getPhysicalPosition().y = newPosition.y;
+		this.getPhysicalPosition().z = newPosition.z;
+	}
+	
+	
 	public void updateRenderedPosition() {
 //		System.out.println("Physical");
 //		System.out.println(this.getPhysicalPosition());
@@ -207,4 +227,14 @@ public abstract class PhysicalEntity extends Entity implements Physical {
 	public Vector3f getVelocity() {
 		return velocity;
 	}
+	
+	@Override
+	public void deleteSelfFromWorld(MainController mc) {
+		if(!mc.getEntities().remove(this)){
+			mc.getNormalMapEntities().remove(this);
+		}
+		mc.getPhysicsWorld().removePhysicalEntityObject(this);
+		
+	}
+
 }

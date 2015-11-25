@@ -138,6 +138,11 @@ public abstract class Entity<T> {
 				this.getRotX(), this.getRotY(), this.getRotZ(), this.getScale());
 	}
 	
+	/**
+	 * As entities only likely to have visual representation 
+	 * @param mc
+	 */
+	public abstract void deleteSelfFromWorld(MainController mc);
 	//public abstract T factoryFromFile(TexturedModel textureModel, String texture_meta, String entity_meta, MainController mc);
 	
 }

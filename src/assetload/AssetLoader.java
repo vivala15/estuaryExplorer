@@ -13,6 +13,7 @@ import entities.Entity;
 import game.AirBoat;
 import game.EntityMembers;
 import game.VisualEntity;
+import levelEditor.PreviewEntityHolder;
 import models.RawModel;
 import models.TexturedModel;
 import normalMappingObjConverter.NormalMappedObjLoader;
@@ -162,7 +163,11 @@ public class AssetLoader {
 //			System.out.println(p.getL());
 			loadEntityUnit(p.getL(), new File(assetFolder + p.getR()));
 		}
-		
+	}
+	
+	
+	public  List<Pair<EntityMembers, String>> getClassAndLocation(){
+		return this.classAndLocation;
 	}
 	
 	private void loadEntityUnit(EntityMembers instance, File folder) {
@@ -204,6 +209,44 @@ public class AssetLoader {
 		instance.factoryFromFile(textureModel, texture_meta, entity_meta,  mc);
 	}
 
+	public PreviewEntityHolder loadSingleEntityUnit(EntityMembers instance, String folderName) {
+		String assetFolder = rootFolder  + "assets/";
+		File folder = new File(assetFolder + folderName);
+		//do essentially model load up here before object specifics come up
+		List<File> files = FileAccess.listFiles(folder);
+		List<File> meta_files = FileAccess.listFiles(
+				new File(rootFolder + "level" + this.levelAppendage
+				+ "/asset_meta/"));
+		String texture_meta = FileAccess.readTextFile(folder.getPath()+"/" + FileAccess.matchFile(files, ".*meta.*"),true);
+		//check meta if normalMapped obj
+		RawModel rawModel;
+		boolean normalMapped = isNormalMapped(texture_meta);
+		if(normalMapped){
+			//probably want these models to be shinder and more reflective to be more noticeable...
+			rawModel = NormalMappedObjLoader.loadOBJ(folder.getPath() + "/rawModel.obj", loader);
+		}else{
+			rawModel = OBJLoader.loadObjModel(folder.getPath() + "/rawModel.obj", loader);
+		}
+		
+		TexturedModel textureModel  = new TexturedModel(rawModel,
+				new ModelTexture(loader.loadTexture(folder.getPath()+"/" + FileAccess.matchFile(files, ".*texture.*"))));
+		
+		if(normalMapped){
+			textureModel.getTexture().setNormalMap(loader.loadTexture(folder.getPath()+"/" + FileAccess.matchFile(files, ".*normal.*")));
+			textureModel.getTexture().setReflectivity(.5f);
+			textureModel.getTexture().setShineDamper(5);
+		}
+		//meta to see if anything to do to texture
+		System.out.println( this.rootFolder + "level" + this.levelAppendage +
+				"/asset_meta/" + FileAccess.matchFile(meta_files, folder.getName()+".*meta.*"));
+		return instance.factoryPreview(textureModel, texture_meta,  mc);
+	}
+	
+	
+	
+	
+	
+	
 	public static boolean isNormalMapped(String texture_meta){
 		String[] perLine = texture_meta.split("\n");
 		for(String li: perLine){

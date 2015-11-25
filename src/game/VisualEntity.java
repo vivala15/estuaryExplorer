@@ -24,45 +24,13 @@ public class VisualEntity extends Entity<VisualEntity>{
 		super(model, position, rotX, rotY, rotZ, scale);
 	}
 
-	public static VisualEntity factoryFromFile(File file) {
-		// TODO Auto-generated method stub
-		return null;
+	@Override
+	public void deleteSelfFromWorld(MainController mc) {
+		if(!mc.getEntities().remove(this)){
+			mc.getNormalMapEntities().remove(this);
+		}
+		
 	}
 
-//	@Override
-//	public VisualEntity factoryFromFile(TexturedModel textureModel,String texture_meta, String entity_meta, MainController mc) {
-//		//Analyze texture_meta and adjustsettings of texture
-//		
-//		//read entity_meta for entity creation
-//		List<VisualEntity> entities = new ArrayList<VisualEntity>();
-//		String[] lineSplit = entity_meta.split("\n");
-//		for(String line : lineSplit){
-//			String[] lineSep = line.split("\\s+");
-//			Vector3f pos = new Vector3f(
-//					Float.valueOf(lineSep[0]),
-//					Float.valueOf(lineSep[1]),
-//					Float.valueOf(lineSep[2])
-//					);
-//			float rotx = Float.valueOf(lineSep[3]);
-//			float roty = Float.valueOf(lineSep[4]);
-//			float rotz = Float.valueOf(lineSep[5]);
-//			float scale = Float.valueOf(lineSep[6]);
-//			VisualEntity airboat = new VisualEntity(
-//					textureModel,
-//					pos,
-//					rotx,
-//					roty,
-//					rotz,
-//					scale
-//					);
-//			entities.add(airboat);
-//		}
-//		//Add entities to physical world and renderer
-//		mc.getEntities().addAll(entities);
-//		//do NOT  add to physical world
-//		
-//		
-//		return null;
-//	}
  
 }

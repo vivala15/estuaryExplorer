@@ -7,6 +7,7 @@ import org.lwjgl.util.vector.Vector3f;
 
 import assetload.AssetLoader;
 import controller.MainController;
+import levelEditor.PreviewEntityHolder;
 import models.TexturedModel;
 
 public enum EntityMembers {
@@ -50,6 +51,16 @@ public enum EntityMembers {
 				mc.getPhysicsWorld().addPhysicalEntityObject(boat);
 			}
 			
+		}
+
+		@Override
+		public PreviewEntityHolder factoryPreview(TexturedModel textureModel, String texture_meta, MainController mc) {
+			
+			AirBoat airboat = new AirBoat(textureModel,new Vector3f(0f,0f,0f),0f,0f,0f,1f);
+			mc.getEntities().add(airboat);
+			mc.getPhysicsWorld().addPhysicalEntityObject(airboat);
+			PreviewEntityHolder previewEntity = new PreviewEntityHolder(airboat,mc);
+			return previewEntity;
 		}
 		
 	},
@@ -96,9 +107,23 @@ public enum EntityMembers {
 			}
 			
 		}
+
+		@Override
+		public PreviewEntityHolder factoryPreview(TexturedModel textureModel, String texture_meta, MainController mc) {
+			VisualEntity entity = new VisualEntity(textureModel,new Vector3f(0f,0f,0f),0f,0f,0f,1f);
+			if(AssetLoader.isNormalMapped(texture_meta)){
+				mc.getNormalMapEntities().add(entity);
+			}else{
+				mc.getEntities().add(entity);
+			}
+			PreviewEntityHolder previewEntity = new PreviewEntityHolder(entity,mc);
+			return previewEntity;
+		}
 		
 	};
 	
 	
 	public abstract void factoryFromFile(TexturedModel textureModel, String texture_meta, String entity_meta, MainController mc);
+	public abstract PreviewEntityHolder factoryPreview(TexturedModel textureModel, String texture_meta,  MainController mc);
+	
 }

@@ -34,7 +34,7 @@ public class Terrain implements Physical{
 	//private static final int VERTEX_COUNT = 128;
 	
 	//sets maximum value compared to map,higher value greater height contrast
-	private static final float MAX_HIEGHT = 55;
+	private static final float MAX_HIEGHT = 40;
 	//could this really be anything else? - don't play with
 	private static final float MAX_PIXEL_COLOUR = 256 * 256 * 256;
 	
@@ -53,7 +53,7 @@ public class Terrain implements Physical{
 	//store height of each vertex for collision logic
 	private float[][] heights;
 	
-	private CollisionShape collisionShape;
+	//private CollisionShape collisionShape;
 	private IndexedMesh indMesh = new IndexedMesh();
 	private static float TriangleSizeX;
 	private static float TriangleSizeZ;

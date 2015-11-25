@@ -36,7 +36,7 @@ public class AirBoat extends BoatPhysicalEntity{
 		transformShape.translate(new Vector3f(-10.0f, 2f, 5f));
 		//resolve discrepencies between model and physical position
 		super.setTransformShapeToRender(transformShape);
-		super.setDragCoefficient(50.0f);
+		super.setDragCoefficient(25.0f);
 		//Thrust over drag coefficient
 		this.maxSpeed = 20000/100f/4f;
 	

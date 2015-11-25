@@ -73,4 +73,11 @@ public class FileAccess {
 	public static String readTextFile(String fileName){
 		return readTextFile(fileName, false);
 	}
+	
+	public static boolean writeTextFile(String parentFolderName, String fileName, String fileContents ){
+		
+		
+		
+		return false;
+	}
 }

@@ -30,6 +30,7 @@ public class AirboatPlayer extends Player{
 	Vector3f cameraVel = new Vector3f();
 	Vector3f angle_vel = new Vector3f();
 	Vector4f desiredOffSet = new Vector4f(2f, 100f, -60f,1f);
+//	Vector4f desiredOffSet = new Vector4f(2f, 200f, -300f,1f);
 	Vector3f scale_vec = new Vector3f();
 	
 	public AirboatPlayer(Camera camera, AirBoat airboat){
